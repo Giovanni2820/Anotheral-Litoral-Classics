@@ -18,7 +18,6 @@
 
   <div class="header__brand">
     <img class="header__logo" id="headerLogo" src="" alt="">
-    <p class="header__tag" id="headerTag"></p>
   </div>
 </header>
 
@@ -26,7 +25,6 @@
 
   <!-- VIDEO -->
   <section class="video" id="video">
-    <p class="eyebrow">Video</p>
     <div class="video__frame" id="videoFrame">
       <button class="video__play" id="videoPlay" type="button" aria-label="Reproducir video">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg>
@@ -38,7 +36,6 @@
   <!-- PRODUCTOS -->
   <section class="shop" id="productos">
     <div class="shop__head">
-      <p class="eyebrow">Catálogo</p>
       <h2 class="section-title">Productos</h2>
     </div>
     <div class="grid" id="productGrid"></div>
@@ -48,24 +45,11 @@
 
 <!-- FOOTER: créditos -->
 <footer class="footer" id="creditos">
-  <p class="eyebrow">Créditos</p>
   <p class="footer__brand" id="footBrand"></p>
   <nav class="footer__links" id="footLinks" aria-label="Redes"></nav>
   <p class="footer__dev" id="footDev"></p>
   <p class="footer__copy" id="footCopy"></p>
 </footer>
-
-<!-- INDICADOR DE SCROLL (margen derecho) -->
-<nav class="scrollnav" aria-label="Secciones">
-  <span class="scrollnav__label">Scroll</span>
-  <svg class="scrollnav__arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v16M6 14l6 6 6-6"/></svg>
-  <div class="scrollnav__dots">
-    <a href="#inicio"    data-section="inicio"    aria-label="Ir al inicio"></a>
-    <a href="#video"     data-section="video"     aria-label="Ir al video"></a>
-    <a href="#productos" data-section="productos" aria-label="Ir a productos"></a>
-    <a href="#creditos"  data-section="creditos"  aria-label="Ir a créditos"></a>
-  </div>
-</nav>
 
 <script src="data.js"></script>
 <script src="script.js"></script>

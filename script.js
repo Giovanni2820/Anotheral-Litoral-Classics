@@ -33,7 +33,6 @@ flagTrack.style.animationDuration = `${SITE.flags.length * 7.5}s`;
 const headerLogo = $('#headerLogo');
 headerLogo.src = SITE.logo;
 headerLogo.alt = SITE.brand;
-$('#headerTag').textContent = SITE.tagline || '';
 
 /* ---------- video de YouTube -------------------------------------------------- */
 
@@ -141,17 +140,3 @@ $('#footLinks').innerHTML = (SITE.credits.links || []).map(l =>
   `<a href="${esc(l.href)}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join('');
 $('#footDev').textContent  = SITE.credits.dev || '';
 $('#footCopy').textContent = `© ${SITE.credits.year} ${SITE.brand}. Todos los derechos reservados.`;
-
-/* ---------- indicador de scroll (margen derecho) ------------------------------- */
-
-const navDots = $$('.scrollnav__dots a');
-const sections = navDots.map(a => $('#' + a.dataset.section)).filter(Boolean);
-
-const io = new IntersectionObserver(entries => {
-  entries.forEach(en => {
-    if (!en.isIntersecting) return;
-    navDots.forEach(a => a.classList.toggle('is-active', a.dataset.section === en.target.id));
-  });
-}, { threshold:.4 });
-
-sections.forEach(s => io.observe(s));

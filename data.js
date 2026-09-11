@@ -14,12 +14,11 @@ const SITE = {
   // Vacío = se muestra el placeholder "VIDEO CLIP DE YOUTUBE".
   // Arranca solo y sin sonido (los navegadores no permiten autoplay con audio);
   // el visitante activa el sonido con los controles del reproductor.
-  youtubeId: 'https://www.youtube.com/watch?v=IG6xt2juJ8Y',
+  youtubeId: 'https://youtu.be/H2oCP-Cs04s',
 
   // --- HEADER -------------------------------------------------------------
   // Logo que va centrado arriba de las banderas.
   logo: 'media/ALC 1.png',
-  tagline: 'Banderas del Litoral',
 
   // Banderas que desfilan por detrás del logo, en loop infinito.
   // El orden es el del desfile. Para sumar o sacar una, editar esta lista.
