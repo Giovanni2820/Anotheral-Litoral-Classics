@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Another Litoral Classic</title>
 <meta name="description" content="Another Litoral Classic — banderas, productos y video.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -35,9 +38,6 @@
 
   <!-- PRODUCTOS -->
   <section class="shop" id="productos">
-    <div class="shop__head">
-      <h2 class="section-title">Productos</h2>
-    </div>
     <div class="grid" id="productGrid"></div>
   </section>
 
@@ -50,6 +50,19 @@
   <p class="footer__dev" id="footDev"></p>
   <p class="footer__copy" id="footCopy"></p>
 </footer>
+
+<!-- QUICK VIEW: panel lateral con el detalle del producto -->
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" hidden>
+  <button class="drawer__close" id="drawerClose" type="button" aria-label="Cerrar">&times;</button>
+  <div class="drawer__media" id="drawerMedia"></div>
+  <div class="drawer__info">
+    <h2 class="drawer__title" id="drawerTitle"></h2>
+    <p class="drawer__price" id="drawerPrice"></p>
+    <p class="drawer__desc" id="drawerDesc"></p>
+    <a class="drawer__cta" id="drawerCta" href="#" target="_blank" rel="noopener">Consultar por WhatsApp</a>
+  </div>
+</aside>
 
 <script src="data.js"></script>
 <script src="script.js"></script>

@@ -11,8 +11,6 @@ const esc = s => String(s).replace(/[&<>"']/g, c =>
 
 const money = n => '$ ' + Number(n).toLocaleString('es-AR');
 
-const coverVars = c => `--c1:${c[0]};--c2:${c[1]};--c3:${c[2]};--ct:${c[3]}`;
-
 const waLink = name =>
   `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(`Hola! Me interesa "${name}"`)}`;
 
@@ -109,29 +107,85 @@ if (!videoId){
 
 /* ---------- grilla de productos ---------------------------------------------- */
 
-function cardHTML(p){
-  const media = p.img
+// Foto del producto, o el nombre sobre blanco si todavía no hay foto.
+function mediaHTML(p){
+  return p.img
     ? `<img class="card__img" src="${esc(p.img)}" alt="${esc(p.name)}" loading="lazy">`
-    : `<div class="card__cover" style="${coverVars(p.colors)}">
-         <span class="card__cover-t">${esc(p.name)}</span>
-       </div>`;
+    : `<div class="card__placeholder">${esc(p.name)}</div>`;
+}
 
+function cardHTML(p, i){
   return `
-    <article class="card">
-      <div class="card__frame">${media}</div>
-      <div class="card__body">
-        <h3 class="card__title">${esc(p.name)}</h3>
-        ${p.desc ? `<p class="card__desc">${esc(p.desc)}</p>` : ''}
-        <p class="card__price">${money(p.price)}</p>
-        <a class="btn btn--solid" href="${waLink(p.name)}" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-4A8 8 0 1 1 8 19.1L4 20z"/><path d="M9.5 9.5c0 3 2 5 5 5l1-1.5-2-1-1 1a4 4 0 0 1-2-2l1-1-1-2z"/></svg>
-          Consultar por WhatsApp
-        </a>
+    <article class="card" data-index="${i}" tabindex="0" role="button"
+             aria-label="${esc(p.name)} — ver detalle">
+      <div class="card__frame">
+        ${mediaHTML(p)}
+        <span class="card__quick" aria-hidden="true">Quick view</span>
       </div>
+      <h3 class="card__title">${esc(p.name)}</h3>
+      <p class="card__price">${money(p.price)}</p>
     </article>`;
 }
 
-$('#productGrid').innerHTML = SITE.products.map(cardHTML).join('');
+const grid = $('#productGrid');
+grid.innerHTML = SITE.products.map(cardHTML).join('');
+
+/* ---------- quick view: panel lateral ----------------------------------------- */
+
+const drawer = $('#drawer');
+const scrim  = $('#scrim');
+let lastFocus = null;
+
+function openDrawer(p){
+  lastFocus = document.activeElement;
+
+  $('#drawerMedia').innerHTML  = mediaHTML(p);
+  $('#drawerTitle').textContent = p.name;
+  $('#drawerPrice').textContent = money(p.price);
+  $('#drawerDesc').textContent  = p.desc || '';
+  $('#drawerCta').href = waLink(p.name);
+
+  drawer.hidden = false; scrim.hidden = false;
+  requestAnimationFrame(() => { drawer.classList.add('is-on'); scrim.classList.add('is-on'); });
+  document.body.classList.add('is-locked');
+  $('#drawerClose').focus();
+}
+
+function closeDrawer(){
+  if (drawer.hidden) return;
+  drawer.classList.remove('is-on'); scrim.classList.remove('is-on');
+  document.body.classList.remove('is-locked');
+  setTimeout(() => { drawer.hidden = true; scrim.hidden = true; }, 350);
+  if (lastFocus) lastFocus.focus();
+}
+
+// abrir: click o Enter/Espacio sobre cualquier tarjeta
+grid.addEventListener('click', e => {
+  const card = e.target.closest('.card');
+  if (card) openDrawer(SITE.products[Number(card.dataset.index)]);
+});
+grid.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const card = e.target.closest('.card');
+  if (!card) return;
+  e.preventDefault();
+  openDrawer(SITE.products[Number(card.dataset.index)]);
+});
+
+// cerrar: botón, fondo oscuro o Escape
+$('#drawerClose').addEventListener('click', closeDrawer);
+scrim.addEventListener('click', closeDrawer);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+// el foco con Tab no se escapa del panel mientras está abierto
+drawer.addEventListener('keydown', e => {
+  if (e.key !== 'Tab') return;
+  const f = $$('button, a[href]', drawer).filter(el => el.offsetParent !== null);
+  if (!f.length) return;
+  const first = f[0], last = f[f.length - 1];
+  if (e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+});
 
 /* ---------- footer ------------------------------------------------------------ */
 

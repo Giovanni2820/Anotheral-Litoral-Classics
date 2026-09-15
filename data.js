@@ -33,13 +33,15 @@ const SITE = {
 
   // --- PRODUCTOS ----------------------------------------------------------
   // Para agregar uno, copiar una línea y cambiar los datos: la grilla lo toma sola.
-  // price en pesos, sin puntos.
-  // img: ruta a una imagen (ej. 'media/remera.jpg'). Si queda vacío se genera
-  // un fondo con los colores de `colors`: [fondo, luz 1, luz 2, color del texto].
+  // price: en pesos, sin puntos.
+  // desc:  se muestra en la ventana de detalle (quick view), no en la tarjeta.
+  // img:   foto del producto (ej. 'media/remera.jpg'). Idealmente cuadrada y con
+  //        fondo blanco, así se ve el recuadro blanco como en la referencia.
+  //        Si queda vacío, la tarjeta muestra el nombre sobre fondo blanco.
   products: [
-    { name: 'Producto 1', price: 25000, desc: 'Descripción breve del producto.', img: '', colors: ['#2a1f18', '#c98f4a', '#5b2f22', '#f6ead2'] },
-    { name: 'Producto 2', price: 18000, desc: 'Descripción breve del producto.', img: '', colors: ['#1a2420', '#6fae95', '#243b33', '#eaf5ee'] },
-    { name: 'Producto 3', price: 32000, desc: 'Descripción breve del producto.', img: '', colors: ['#291a24', '#b06a92', '#150d13', '#ffe4f3'] },
+    { name: 'Producto 1', price: 25000, desc: 'Descripción breve del producto.', img: '' },
+    { name: 'Producto 2', price: 18000, desc: 'Descripción breve del producto.', img: '' },
+    { name: 'Producto 3', price: 32000, desc: 'Descripción breve del producto.', img: '' },
   ],
 
   // --- CRÉDITOS -----------------------------------------------------------
