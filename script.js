@@ -12,7 +12,7 @@ const esc = s => String(s).replace(/[&<>"']/g, c =>
 const money = n => '$ ' + Number(n).toLocaleString('es-AR');
 
 const waLink = name =>
-  `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(`Hola! Me interesa "${name}"`)}`;
+  `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(`Hola! Me interesa: ${name}`)}`;
 
 /* ---------- header: banderas desfilando detrás del logo ---------------------- */
 
@@ -32,77 +32,126 @@ const headerLogo = $('#headerLogo');
 headerLogo.src = SITE.logo;
 headerLogo.alt = SITE.brand;
 
-/* ---------- video de YouTube -------------------------------------------------- */
+/* ---------- video: hero con título encima, autoplay muteado ------------------ */
 
-const videoFrame = $('#videoFrame');
+const videoFrame   = $("#videoFrame");
+const videoMedia   = $("#videoMedia");
+const videoOverlay = $("#videoOverlay");
+const videoPlay    = $("#videoPlay");
+const videoLabel   = $("#videoLabel");
+
+$("#videoTitle").textContent = SITE.videoTitle || "";
+$("#videoSub").textContent   = SITE.videoSubtitle || "";
 
 // Acepta tanto el ID pelado como el link completo de YouTube en cualquiera de
 // sus formas (watch?v=, youtu.be, /shorts/, /embed/, /live/).
 function youtubeId(value){
-  const raw = String(value || '').trim();
-  if (!raw) return '';
+  const raw = String(value || "").trim();
+  if (!raw) return "";
   if (/^[\w-]{11}$/.test(raw)) return raw;            // ya es un ID
   const m = raw.match(/(?:v=|youtu\.be\/|\/shorts\/|\/embed\/|\/live\/)([\w-]{11})/);
-  return m ? m[1] : '';
+  return m ? m[1] : "";
 }
 
-const videoId = youtubeId(SITE.youtubeId);
+const videoId  = youtubeId(SITE.youtubeId);
+const watchUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
-if (!videoId){
-  videoFrame.classList.add('is-placeholder');
-  $('#videoPlay').setAttribute('aria-disabled', 'true');
-  $('#videoLabel').textContent = 'Video clip de YouTube';
-} else if (location.protocol === 'file:'){
-  // Abierto con doble clic sobre index.html: sin origen http, YouTube rechaza
-  // el embed con "Error 153". Hay que servir la carpeta (ver README / serve.js).
-  videoFrame.classList.add('is-placeholder');
-  $('#videoPlay').setAttribute('aria-disabled', 'true');
-  $('#videoLabel').innerHTML =
-    'Abrí el sitio con un servidor (no con doble clic) para ver el video &middot; ' +
-    `<a href="https://www.youtube.com/watch?v=${videoId}" target="_blank" rel="noopener">Ver en YouTube</a>`;
-} else {
-  // Arranca solo. Los navegadores sólo permiten autoplay sin sonido, así que
-  // sale muteado; el visitante activa el audio con los controles de YouTube.
-  //
-  // `origin` es obligatorio para que YouTube valide el embed: sin él devuelve
-  // "Error 153". Por el mismo motivo se usa youtube.com y no youtube-nocookie,
-  // que es más estricto con el referrer.
+// `origin` es obligatorio para que YouTube valide el embed: sin él devuelve
+// "Error 153". Por el mismo motivo se usa youtube.com y no youtube-nocookie,
+// que es más estricto con el referrer.
+function embed(extra){
   const params = new URLSearchParams({
-    autoplay:'1', mute:'1', playsinline:'1', rel:'0',
-    modestbranding:'1', enablejsapi:'1', origin: location.origin
+    autoplay:"1", playsinline:"1", rel:"0", modestbranding:"1",
+    enablejsapi:"1", origin: location.origin, ...extra
   });
-  videoFrame.innerHTML = `
+  return `
     <iframe src="https://www.youtube.com/embed/${videoId}?${params}"
             title="Video de ${esc(SITE.brand)}"
             referrerpolicy="strict-origin-when-cross-origin"
             allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
             allowfullscreen></iframe>`;
+}
+
+// Inserta el iframe y le inicia el "handshake" de la API de YouTube. Sin este
+// mensaje el reproductor nunca le habla a la página, aunque esté funcionando,
+// y la detección de fallo de más abajo daría un falso negativo.
+function mount(extra){
+  videoMedia.innerHTML = embed(extra);
+  const frame = videoMedia.querySelector("iframe");
+  frame.addEventListener("load", () => {
+    const hello = () => frame.contentWindow?.postMessage(
+      JSON.stringify({ event:"listening", id:1, channel:"widget" }), "https://www.youtube.com");
+    hello(); setTimeout(hello, 600); setTimeout(hello, 1800);
+  });
+}
+
+function showLabel(html){
+  videoLabel.innerHTML = html;
+  videoLabel.hidden = false;
+}
+
+if (!videoId){
+  videoFrame.classList.add("is-placeholder");
+  videoPlay.disabled = true;
+  showLabel("Video clip de YouTube");
+
+} else if (location.protocol === "file:"){
+  // Abierto con doble clic sobre index.html: sin origen http, YouTube rechaza
+  // el embed con "Error 153". Hay que servir la carpeta (ver serve.js).
+  videoFrame.classList.add("is-placeholder");
+  videoPlay.addEventListener("click", () => window.open(watchUrl, "_blank", "noopener"));
+  showLabel("Abrí el sitio con un servidor (no con doble clic) para ver el video");
+
+} else {
+  // De fondo: arranca solo, sin sonido (los navegadores no permiten autoplay
+  // con audio), sin controles y en loop, con el título encima.
+  mount({ mute:"1", controls:"0", loop:"1", playlist:videoId });
+
+  // El play del overlay lo reproduce con sonido y controles. Como lo dispara
+  // un clic del visitante, el navegador sí permite el audio.
+  videoPlay.addEventListener("click", () => {
+    if (videoFrame.classList.contains("is-fallback")){
+      window.open(watchUrl, "_blank", "noopener");
+      return;
+    }
+    if (videoFrame.classList.contains("is-playing")) return;
+    mount({ mute:"0", controls:"1" });
+    videoFrame.classList.add("is-playing");
+  });
 
   // Con enablejsapi el reproductor le habla a la página apenas arranca. Si en
   // unos segundos no dijo nada, es que YouTube sirvió su pantalla de error
-  // (típicamente "Error 153", cuando rechaza el origen del sitio). En ese caso
-  // mostramos la miniatura con un link al video en vez del cartel de error.
+  // (típicamente "Error 153"). En ese caso tapamos el iframe con la miniatura
+  // —sin destruirlo— y el play abre el video en YouTube. Si el reproductor
+  // termina respondiendo más tarde (conexión lenta), la miniatura se quita sola.
   let playerAlive = false;
   const hear = e => {
-    if (String(e.origin).includes('youtube')) playerAlive = true;
+    if (!String(e.origin).includes("youtube")) return;
+    playerAlive = true;
+    window.removeEventListener("message", hear);
+    const thumb = videoMedia.querySelector(".video__thumb");
+    if (thumb){ thumb.remove(); videoFrame.classList.remove("is-fallback"); videoLabel.hidden = true; }
   };
-  window.addEventListener('message', hear);
+  window.addEventListener("message", hear);
 
   setTimeout(() => {
-    window.removeEventListener('message', hear);
     if (playerAlive) return;
-    videoFrame.classList.add('is-fallback');
-    videoFrame.innerHTML = `
-      <a class="video__fallback" href="https://www.youtube.com/watch?v=${videoId}"
-         target="_blank" rel="noopener">
-        <img class="video__thumb" src="https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg" alt=""
-             onerror="this.src='https://i.ytimg.com/vi/${videoId}/hqdefault.jpg'">
-        <span class="video__play">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg>
-        </span>
-        <span class="video__label">Ver en YouTube</span>
-      </a>`;
+    videoFrame.classList.add("is-fallback");
+    videoMedia.insertAdjacentHTML("beforeend", `
+      <img class="video__thumb" src="https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg" alt=""
+           onerror="this.src='https://i.ytimg.com/vi/${videoId}/hqdefault.jpg'">`);
+    showLabel("Ver en YouTube");
   }, 6000);
+}
+
+/* ---------- merch: imagen a ancho completo ----------------------------------- */
+
+const merchImg = $('#merchImg');
+if (SITE.merchImage){
+  merchImg.src = SITE.merchImage;
+  merchImg.alt = SITE.merchAlt || '';
+} else {
+  $('#merch').hidden = true;
 }
 
 /* ---------- grilla de productos ---------------------------------------------- */
@@ -136,6 +185,21 @@ const drawer = $('#drawer');
 const scrim  = $('#scrim');
 let lastFocus = null;
 
+// Lista "Incluye": cada ítem es un texto, o { item, sub:[...] } si tiene sub-ítems.
+function includesHTML(list){
+  if (!list || !list.length) return '';
+  const li = x => typeof x === 'string'
+    ? `<li>${esc(x)}</li>`
+    : `<li>${esc(x.item)}<ul>${(x.sub || []).map(s => `<li>${esc(s)}</li>`).join('')}</ul></li>`;
+  return `<p class="drawer__label">Incluye:</p><ul>${list.map(li).join('')}</ul>`;
+}
+
+// Tracklist numerado (el <ol> pone los números solo).
+function tracklistHTML(list){
+  if (!list || !list.length) return '';
+  return `<p class="drawer__label">Tracklist:</p><ol>${list.map(t => `<li>${esc(t)}</li>`).join('')}</ol>`;
+}
+
 function openDrawer(p){
   lastFocus = document.activeElement;
 
@@ -143,6 +207,8 @@ function openDrawer(p){
   $('#drawerTitle').textContent = p.name;
   $('#drawerPrice').textContent = money(p.price);
   $('#drawerDesc').textContent  = p.desc || '';
+  $('#drawerIncludes').innerHTML = includesHTML(p.includes);
+  $('#drawerTracklist').innerHTML = tracklistHTML(p.tracklist);
   $('#drawerCta').href = waLink(p.name);
 
   drawer.hidden = false; scrim.hidden = false;

@@ -29,11 +29,24 @@
   <!-- VIDEO -->
   <section class="video" id="video">
     <div class="video__frame" id="videoFrame">
-      <button class="video__play" id="videoPlay" type="button" aria-label="Reproducir video">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg>
-      </button>
-      <span class="video__label" id="videoLabel">Video clip de YouTube</span>
+      <!-- acá va el iframe de YouTube (o la miniatura si el embed falla) -->
+      <div class="video__media" id="videoMedia"></div>
+
+      <!-- título, subtítulo y play encima del video, estilo referencia -->
+      <div class="video__overlay" id="videoOverlay">
+        <h2 class="video__title" id="videoTitle"></h2>
+        <p class="video__sub" id="videoSub"></p>
+        <button class="video__play" id="videoPlay" type="button" aria-label="Reproducir con sonido">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg>
+        </button>
+        <span class="video__label" id="videoLabel" hidden></span>
+      </div>
     </div>
+  </section>
+
+  <!-- MERCH: catálogo a ancho completo -->
+  <section class="merch" id="merch">
+    <img class="merch__img" id="merchImg" src="" alt="" loading="lazy" decoding="async">
   </section>
 
   <!-- PRODUCTOS -->
@@ -60,6 +73,8 @@
     <h2 class="drawer__title" id="drawerTitle"></h2>
     <p class="drawer__price" id="drawerPrice"></p>
     <p class="drawer__desc" id="drawerDesc"></p>
+    <div class="drawer__includes" id="drawerIncludes"></div>
+    <div class="drawer__tracklist" id="drawerTracklist"></div>
     <a class="drawer__cta" id="drawerCta" href="#" target="_blank" rel="noopener">Consultar por WhatsApp</a>
   </div>
 </aside>

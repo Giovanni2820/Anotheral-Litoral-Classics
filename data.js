@@ -14,7 +14,11 @@ const SITE = {
   // Vacío = se muestra el placeholder "VIDEO CLIP DE YOUTUBE".
   // Arranca solo y sin sonido (los navegadores no permiten autoplay con audio);
   // el visitante activa el sonido con los controles del reproductor.
-  youtubeId: 'https://youtu.be/H2oCP-Cs04s',
+  youtubeId: 'https://www.youtube.com/watch?v=AIpyLlPd7Yo',
+
+  // Texto que va encima del video, como en la referencia.
+  videoTitle: 'Adenosina Trifosfato',
+  videoSubtitle: 'Aq & Otta',
 
   // --- HEADER -------------------------------------------------------------
   // Logo que va centrado arriba de las banderas.
@@ -31,17 +35,66 @@ const SITE = {
     { name: 'Santa Fe',   img: 'media/bandera-santa-fe.jpg'   },
   ],
 
+  // --- MERCH --------------------------------------------------------------
+  // Imagen a ancho completo entre el video y los productos.
+  merchImage: 'media/MERCHFINAL.png',
+  merchAlt: 'Catálogo de merch de Cocina por Peso$: CD, libro QR, remera y stickers',
+
   // --- PRODUCTOS ----------------------------------------------------------
-  // Para agregar uno, copiar una línea y cambiar los datos: la grilla lo toma sola.
-  // price: en pesos, sin puntos.
-  // desc:  se muestra en la ventana de detalle (quick view), no en la tarjeta.
-  // img:   foto del producto (ej. 'media/remera.jpg'). Idealmente cuadrada y con
-  //        fondo blanco, así se ve el recuadro blanco como en la referencia.
-  //        Si queda vacío, la tarjeta muestra el nombre sobre fondo blanco.
+  // Para agregar uno, copiar un bloque y cambiar los datos: la grilla lo toma sola.
+  // name:     título (va en la tarjeta y en la ventana de detalle).
+  // price:    en pesos, sin puntos.
+  // desc:     bajada corta, sólo en la ventana de detalle.
+  // includes: lista "Incluye". Cada ítem es un texto; si necesita sub-ítems,
+  //           va como { item: '...', sub: ['...', '...'] }.
+  // tracklist: opcional, lista de temas en orden (se numera sola).
+  // img:      foto del producto (ej. 'media/cd.jpg'). Idealmente cuadrada y con
+  //           fondo blanco. Si queda vacío, la tarjeta muestra el nombre sobre blanco.
   products: [
-    { name: 'Producto 1', price: 25000, desc: 'Descripción breve del producto.', img: '' },
-    { name: 'Producto 2', price: 18000, desc: 'Descripción breve del producto.', img: '' },
-    { name: 'Producto 3', price: 32000, desc: 'Descripción breve del producto.', img: '' },
+    {
+      name: '"COCINA POR PESO$" edición física',
+      price: 20000,
+      desc: 'Disco + Libro QR (contenido extra)',
+      includes: [
+        '"PLATO DEL DIA" - CD con el tracklist completo de "COCINA POR PESO$"',
+        { item: '"MENÚ" - libro con QR que desbloquea el contenido extra:', sub: [
+          '"CONSUMO DELIBERADO - un mensaje de Aq y Otta"',
+          '"Adenosina Trifosfato version alternativa (Dirty mix)"',
+          'ALBUM + INSTRUMENTALES + ACAPELLAS EN .WAV',
+        ]},
+        '"DEDO" y "CX$" - Pack de 2 stickers',
+      ],
+      tracklist: [
+        'MENÚ DE PASOS',
+        'T.L.I.D.',
+        'ESPEJOS DE COLORES',
+        'GRAN BAZAR DE ESTAMBUL',
+        'ADENOSINA TRIFOSFATO',
+        'MADVILANESCO',
+        'MISE EN PLACE',
+        'SABORES Y TEXTURAS',
+      ],
+      img: '',
+    },
+    {
+      name: '"TRACKLIST // EL BIFE ORIGINAL" remera',
+      price: 35000,
+      desc: '100% algodón peinado, estampado en serigrafía',
+      includes: [
+        '"DEDO" y "CX$" - Pack de 2 stickers',
+      ],
+      img: '',
+    },
+    {
+      name: '"COMBO COMPLETO" CD + REMERA "COCINA POR PESO$"',
+      price: 50000,
+      desc: '',
+      includes: [
+        '"COCINA POR PESO$" edición física: Disco + Libro QR (contenido extra)',
+        '"TRACKLIST // EL BIFE ORIGINAL" remera: 100% algodón peinado, estampado en serigrafía',
+      ],
+      img: '',
+    },
   ],
 
   // --- CRÉDITOS -----------------------------------------------------------
