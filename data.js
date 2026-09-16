@@ -14,10 +14,11 @@ const SITE = {
   // Vacío = se muestra el placeholder "VIDEO CLIP DE YOUTUBE".
   // Arranca solo y sin sonido (los navegadores no permiten autoplay con audio);
   // el visitante activa el sonido con los controles del reproductor.
-  youtubeId: 'https://www.youtube.com/watch?v=AIpyLlPd7Yo',
+  // Si el link trae &t= (minuto de inicio), el video arranca desde ahí.
+  youtubeId: 'https://www.youtube.com/watch?v=H2oCP-Cs04s&t=499s',
 
   // Texto que va encima del video, como en la referencia.
-  videoTitle: 'Adenosina Trifosfato',
+  videoTitle: 'COCINA POR PESO$',
   videoSubtitle: 'Aq & Otta',
 
   // --- HEADER -------------------------------------------------------------
@@ -99,11 +100,13 @@ const SITE = {
 
   // --- CRÉDITOS -----------------------------------------------------------
   credits: {
+    tagline: 'Ecosistema divulgador de cultura',
     year: 2026,
     dev: 'Diseño y desarrollo: —',
     links: [
-      { label: 'Instagram', href: '#' },
-      { label: 'YouTube',   href: '#' },
+      { label: 'Instagram', href: 'https://www.instagram.com/anotherlitoralclassic' },
+      { label: 'YouTube',   href: 'https://youtube.com/@anotherlitoralclassic' },
+      { label: 'Spotify',   href: 'https://open.spotify.com/intl-es/artist/5vVILR2nmj5hBNCIpZRxVQ' },
     ],
   },
 };

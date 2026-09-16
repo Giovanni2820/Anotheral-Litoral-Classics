@@ -53,8 +53,16 @@ function youtubeId(value){
   return m ? m[1] : "";
 }
 
-const videoId  = youtubeId(SITE.youtubeId);
-const watchUrl = `https://www.youtube.com/watch?v=${videoId}`;
+// Segundo de inicio a partir del &t= del link (acepta 499, 499s o 8m19s).
+function youtubeStart(value){
+  const m = String(value || "").match(/[?&#]t=(?:(\d+)h)?(?:(\d+)m)?(\d+)s?/);
+  if (!m) return 0;
+  return (Number(m[1] || 0) * 3600) + (Number(m[2] || 0) * 60) + Number(m[3]);
+}
+
+const videoId    = youtubeId(SITE.youtubeId);
+const videoStart = youtubeStart(SITE.youtubeId);
+const watchUrl   = `https://www.youtube.com/watch?v=${videoId}` + (videoStart ? `&t=${videoStart}s` : "");
 
 // `origin` es obligatorio para que YouTube valide el embed: sin él devuelve
 // "Error 153". Por el mismo motivo se usa youtube.com y no youtube-nocookie,
@@ -62,7 +70,9 @@ const watchUrl = `https://www.youtube.com/watch?v=${videoId}`;
 function embed(extra){
   const params = new URLSearchParams({
     autoplay:"1", playsinline:"1", rel:"0", modestbranding:"1",
-    enablejsapi:"1", origin: location.origin, ...extra
+    enablejsapi:"1", origin: location.origin,
+    ...(videoStart ? { start: String(videoStart) } : {}),
+    ...extra
   });
   return `
     <iframe src="https://www.youtube.com/embed/${videoId}?${params}"
@@ -256,7 +266,17 @@ drawer.addEventListener('keydown', e => {
 /* ---------- footer ------------------------------------------------------------ */
 
 $('#footBrand').textContent = SITE.brand;
-$('#footLinks').innerHTML = (SITE.credits.links || []).map(l =>
-  `<a href="${esc(l.href)}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join('');
+$('#footTagline').textContent = SITE.credits.tagline || '';
+// Íconos monocromos por red. Se elige por el nombre del link (sin importar mayúsculas).
+const SOCIAL_ICONS = {
+  instagram: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none"/></svg>',
+  youtube:   '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 8.2a2.6 2.6 0 0 0-1.8-1.8C18.6 6 12 6 12 6s-6.6 0-8.2.4A2.6 2.6 0 0 0 2 8.2 27 27 0 0 0 1.6 12 27 27 0 0 0 2 15.8a2.6 2.6 0 0 0 1.8 1.8C5.4 18 12 18 12 18s6.6 0 8.2-.4a2.6 2.6 0 0 0 1.8-1.8A27 27 0 0 0 22.4 12 27 27 0 0 0 22 8.2z" fill="currentColor" stroke="none"/><path d="M10 9.2v5.6l4.8-2.8z" fill="#0f0f0f" stroke="none"/></svg>',
+  spotify:   '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M7 9.4c3.6-1 7.2-.7 10.2 1M7.6 12.4c3-.8 5.9-.5 8.4.9M8.2 15.2c2.3-.6 4.6-.4 6.5.7"/></svg>',
+};
+
+$('#footLinks').innerHTML = (SITE.credits.links || []).map(l => {
+  const icon = SOCIAL_ICONS[String(l.label).toLowerCase()] || '';
+  return `<a href="${esc(l.href)}" target="_blank" rel="noopener">${icon}<span>${esc(l.label)}</span></a>`;
+}).join('');
 $('#footDev').textContent  = SITE.credits.dev || '';
 $('#footCopy').textContent = `© ${SITE.credits.year} ${SITE.brand}. Todos los derechos reservados.`;
