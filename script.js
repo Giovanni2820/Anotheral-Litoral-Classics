@@ -280,3 +280,34 @@ $('#footLinks').innerHTML = (SITE.credits.links || []).map(l => {
 }).join('');
 $('#footDev').textContent  = SITE.credits.dev || '';
 $('#footCopy').textContent = `© ${SITE.credits.year} ${SITE.brand}. Todos los derechos reservados.`;
+
+/* ---------- aparición al scrollear ------------------------------------------- */
+
+// Cada bloque arranca invisible y un poco más abajo; cuando entra en pantalla
+// se le pone .is-visible y el CSS lo hace aparecer. Las tarjetas van en cascada.
+// La clase la agrega el JS (no el HTML): si el script no corre, todo se ve igual.
+const revealTargets = [
+  ...$$('.video, .merch, .footer'),
+  ...$$('.card'),
+];
+
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+if (!reduceMotion && 'IntersectionObserver' in window){
+  $$('.card').forEach((card, i) => card.style.setProperty('--delay', `${i * 110}ms`));
+  revealTargets.forEach(el => el.classList.add('reveal'));
+
+  const revealer = new IntersectionObserver((entries, obs) => {
+    entries.forEach(en => {
+      if (!en.isIntersecting) return;
+      en.target.classList.add('is-visible');
+      obs.unobserve(en.target);            // aparece una vez y queda
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+
+  revealTargets.forEach(el => {
+    // Lo que ya está a la vista al cargar aparece enseguida, sin esperar al observer.
+    if (el.getBoundingClientRect().top < innerHeight * 0.92) el.classList.add('is-visible');
+    else revealer.observe(el);
+  });
+}

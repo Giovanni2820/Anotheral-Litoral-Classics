@@ -381,6 +381,22 @@ body.is-locked{ overflow:hidden; }
 .footer__dev,.footer__copy{ margin:0; font-size:12px; color:var(--muted); }
 .footer__dev{ margin-bottom:6px; }
 
+/* ---------- aparición al scrollear ------------------------------------ */
+
+/* .reveal la pone el JS; .is-visible cuando el bloque entra en pantalla */
+.reveal{
+  opacity:0;
+  transform:translateY(28px);
+  transition:opacity .75s var(--ease), transform .75s var(--ease);
+  transition-delay:var(--delay, 0ms);
+  will-change:opacity, transform;
+}
+.reveal.is-visible{
+  opacity:1;
+  transform:none;
+  will-change:auto;
+}
+
 /* ---------- responsive ------------------------------------------------ */
 
 @media (max-width:768px){
