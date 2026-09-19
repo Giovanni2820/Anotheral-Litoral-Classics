@@ -154,23 +154,76 @@ if (!videoId){
   }, 6000);
 }
 
-/* ---------- merch: imagen a ancho completo ----------------------------------- */
+/* ---------- merch: el póster armado en código -------------------------------- */
 
-const merchImg = $('#merchImg');
-if (SITE.merchImage){
-  merchImg.src = SITE.merchImage;
-  merchImg.alt = SITE.merchAlt || '';
+// Cada ítem del póster es un <figure>: la etiqueta (1.a, 1.b...), sus piezas y
+// el texto. En escritorio el figure no genera caja (display:contents) y cada
+// parte se posiciona en porcentajes contra el póster; en mobile se apila.
+// La pieza es un wrapper (posición + aparición) con el <img> adentro
+// (animación en reposo + hover): así los transform de uno no pisan al otro.
+
+const merchSection = $('#merch');
+const collage      = $('#collage');
+
+// Precio real desde products, o el texto fijo de lo que no se vende suelto.
+function priceOf(it){
+  if (it.price) return it.price;
+  const p = SITE.products[it.product];
+  return p ? money(p.price) : '';
+}
+
+function pieceHTML(pc){
+  return `
+    <div class="collage__piece" data-piece="${esc(pc.id)}">
+      <img src="${esc(pc.img)}" alt="${esc(pc.alt || '')}" loading="lazy" decoding="async">
+    </div>`;
+}
+
+function itemHTML(it){
+  const name = it.name ? `<i>${esc(it.name)}</i> ` : '';
+  return `
+    <figure class="collage__item" data-item="${esc(it.id)}">
+      <span class="collage__label" data-label="${esc(it.id)}" aria-hidden="true">${esc(it.label)}</span>
+      ${it.pieces.map(pieceHTML).join('')}
+      <figcaption class="collage__caption" data-caption="${esc(it.id)}">
+        <p>${esc(it.label)} - ${name}${esc(it.title)}<br>${esc(it.desc)}</p>
+        <p class="collage__meta">
+          <b>Cat. No.<br>${esc(it.cat)}</b>
+          <b>Precio<br>${esc(priceOf(it))}</b>
+        </p>
+      </figcaption>
+    </figure>`;
+}
+
+if (SITE.merch){
+  const m = SITE.merch;
+  collage.style.backgroundImage = `url("${m.background}")`;
+  collage.innerHTML = `
+    <div class="collage__frame" aria-hidden="true"></div>
+    ${m.watermark ? `<img class="collage__watermark" src="${esc(m.watermark)}" alt="" aria-hidden="true">` : ''}
+    ${m.items.map(itemHTML).join('')}
+    <img class="collage__logo" src="${esc(m.logo)}" alt="${esc(SITE.brand)}">
+    <p class="collage__banner">${esc(m.banner)}</p>`;
+
+} else if (SITE.merchImage){
+  // Sin bloque merch en data.js: la imagen fija del póster, como antes.
+  collage.remove();
+  merchSection.innerHTML = `<img class="merch__img" src="${esc(SITE.merchImage)}"
+    alt="${esc(SITE.merchAlt || '')}" loading="lazy" decoding="async">`;
+
 } else {
-  $('#merch').hidden = true;
+  merchSection.hidden = true;
 }
 
 /* ---------- grilla de productos ---------------------------------------------- */
 
 // Foto del producto, o el nombre sobre blanco si todavía no hay foto.
+// La foto entra entera en el cuadrado (no se recorta); las franjas que quedan
+// libres toman el color de bg, así el fondo de la foto se extiende sin costura.
 function mediaHTML(p){
-  return p.img
-    ? `<img class="card__img" src="${esc(p.img)}" alt="${esc(p.name)}" loading="lazy">`
-    : `<div class="card__placeholder">${esc(p.name)}</div>`;
+  if (!p.img) return `<div class="card__placeholder">${esc(p.name)}</div>`;
+  const bg = p.bg ? ` style="background:${esc(p.bg)}"` : '';
+  return `<img class="card__img" src="${esc(p.img)}" alt="${esc(p.name)}" loading="lazy"${bg}>`;
 }
 
 function cardHTML(p, i){
@@ -287,14 +340,18 @@ $('#footCopy').textContent = `© ${SITE.credits.year} ${SITE.brand}. Todos los d
 // se le pone .is-visible y el CSS lo hace aparecer. Las tarjetas van en cascada.
 // La clase la agrega el JS (no el HTML): si el script no corre, todo se ve igual.
 const revealTargets = [
-  ...$$('.video, .merch, .footer'),
+  ...$$('.video, .footer'),
   ...$$('.card'),
+  ...$$('.collage__frame, .collage__label, .collage__piece, .collage__caption, .collage__logo, .collage__banner, .merch__img'),
 ];
 
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 if (!reduceMotion && 'IntersectionObserver' in window){
   $$('.card').forEach((card, i) => card.style.setProperty('--delay', `${i * 110}ms`));
+  // Las partes del póster caen en cascada sobre el fondo rojo.
+  $$('.collage__frame, .collage__label, .collage__piece, .collage__caption, .collage__logo, .collage__banner')
+    .forEach((el, i) => el.style.setProperty('--delay', `${i * 80}ms`));
   revealTargets.forEach(el => el.classList.add('reveal'));
 
   const revealer = new IntersectionObserver((entries, obs) => {
