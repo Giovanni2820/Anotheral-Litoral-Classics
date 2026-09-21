@@ -154,7 +154,7 @@ const SITE = {
       includes: [
         '"DEDO" y "CX$" - Pack de 2 stickers',
       ],
-      img: 'media/Producto2.png',
+      img: 'media/Producto22.png',
       bg: '#781918',
       shirt: 'multi',
     },
@@ -176,7 +176,8 @@ const SITE = {
   credits: {
     tagline: 'Ecosistema divulgador de cultura',
     year: 2026,
-    dev: 'Diseño y desarrollo: —',
+    dev: 'Diseño y desarrollo: Giovasposito',
+    devLink: 'https://www.instagram.com/giovasposito',
     links: [
       { label: 'Instagram', href: 'https://www.instagram.com/anotherlitoralclassic' },
       { label: 'YouTube',   href: 'https://youtube.com/@anotherlitoralclassic' },

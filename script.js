@@ -454,7 +454,11 @@ $('#footLinks').innerHTML = (SITE.credits.links || []).map(l => {
   const icon = SOCIAL_ICONS[String(l.label).toLowerCase()] || '';
   return `<a href="${esc(l.href)}" target="_blank" rel="noopener">${icon}<span>${esc(l.label)}</span></a>`;
 }).join('');
-$('#footDev').textContent  = SITE.credits.dev || '';
+// El crédito de desarrollo linkea a devLink si está cargado (ej. Instagram).
+const footDev = $('#footDev');
+footDev.innerHTML = SITE.credits.devLink
+  ? `<a href="${esc(SITE.credits.devLink)}" target="_blank" rel="noopener">${esc(SITE.credits.dev || '')}</a>`
+  : esc(SITE.credits.dev || '');
 $('#footCopy').textContent = `© ${SITE.credits.year} ${SITE.brand}. Todos los derechos reservados.`;
 
 /* ---------- aparición al scrollear ------------------------------------------- */
