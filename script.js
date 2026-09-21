@@ -11,8 +11,8 @@ const esc = s => String(s).replace(/[&<>"']/g, c =>
 
 const money = n => '$ ' + Number(n).toLocaleString('es-AR');
 
-const waLink = name =>
-  `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(`Hola! Me interesa: ${name}`)}`;
+const waLink = msg =>
+  `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(msg)}`;
 
 /* ---------- header: banderas desfilando detrás del logo ---------------------- */
 
@@ -263,6 +263,123 @@ function tracklistHTML(list){
   return `<p class="drawer__label">Tracklist:</p><ol>${list.map(t => `<li>${esc(t)}</li>`).join('')}</ol>`;
 }
 
+/* ---------- opciones de remera: color, talle, cantidad ------------------------ */
+
+// Estado de lo elegido en el panel abierto. Se arma de cero en cada openDrawer.
+//   multi:  { rows: { Roja: { qty, size }, Negra: { qty, size } } }
+//   single: { color, size }
+let pick = null;
+let pickProduct = null;
+
+const drawerOptions = $('#drawerOptions');
+const drawerHint    = $('#drawerHint');
+const drawerCta     = $('#drawerCta');
+
+const pillsHTML = (list, chosen, data) => list.map(v =>
+  `<button type="button" class="drawer__pill" data-${data}="${esc(v)}"
+           aria-pressed="${v === chosen}">${esc(v)}</button>`).join('');
+
+// Remera suelta: una fila por color con cantidad y talle.
+function multiOptionsHTML(){
+  return SITE.shirt.colors.map(c => {
+    const r = pick.rows[c];
+    return `
+      <div class="drawer__row" data-color="${esc(c)}">
+        <div class="drawer__rowhead">
+          <span class="drawer__rowname">Remera ${esc(c)}</span>
+          <span class="drawer__qty" aria-label="Cantidad de remeras ${esc(c)}">
+            <button type="button" data-qty="-1" aria-label="Menos" ${r.qty <= 0 ? 'disabled' : ''}>&minus;</button>
+            <output>${r.qty}</output>
+            <button type="button" data-qty="1" aria-label="Más">+</button>
+          </span>
+        </div>
+        <div class="drawer__pills" aria-label="Talle">${pillsHTML(SITE.shirt.sizes, r.size, 'size')}</div>
+      </div>`;
+  }).join('');
+}
+
+// Combo: una sola remera, color y talle.
+function singleOptionsHTML(){
+  return `
+    <div class="drawer__row">
+      <span class="drawer__rowname">Color de la remera</span>
+      <div class="drawer__pills">${pillsHTML(SITE.shirt.colors, pick.color, 'color')}</div>
+    </div>
+    <div class="drawer__row">
+      <span class="drawer__rowname">Talle</span>
+      <div class="drawer__pills">${pillsHTML(SITE.shirt.sizes, pick.size, 'size')}</div>
+    </div>`;
+}
+
+// Lo que falta elegir, o '' si ya se puede mandar.
+function pickProblem(){
+  const kind = pickProduct?.shirt;
+  if (!kind) return '';
+  if (kind === 'single'){
+    if (!pick.color && !pick.size) return 'Elegí color y talle de la remera.';
+    if (!pick.color) return 'Elegí el color de la remera.';
+    return pick.size ? '' : 'Elegí el talle de la remera.';
+  }
+  const rows = Object.values(pick.rows);
+  if (!rows.some(r => r.qty > 0)) return 'Elegí al menos una remera.';
+  if (rows.some(r => r.qty > 0 && !r.size)) return 'Elegí el talle de cada remera.';
+  return '';
+}
+
+// "roja" / "negras": el color en minúscula, en plural si hace falta.
+const colorWord = (c, n) => c.toLowerCase() + (n === 1 ? '' : 's');
+
+function buildMessage(p){
+  const hola = 'Hola, como estas? ';
+  if (p.shirt === 'multi'){
+    const parts = SITE.shirt.colors
+      .map(c => ({ c, ...pick.rows[c] }))
+      .filter(r => r.qty > 0)
+      .map(r => `${r.qty} ${r.qty === 1 ? 'remera' : 'remeras'} ${colorWord(r.c, r.qty)} talle ${r.size}`);
+    return hola + 'Quiero comprar ' + parts.join(' y ');
+  }
+  if (p.shirt === 'single'){
+    // "rojo"/"negro": el color sin la -a final del nombre.
+    const color = pick.color.toLowerCase().replace(/a$/, 'o');
+    return hola + `Quiero llevarme el ${p.name}, la remera debe ser ${pick.size} en ${color}`;
+  }
+  return hola + `Quiero comprar ${p.name}`;
+}
+
+function renderOptions(){
+  const kind = pickProduct.shirt;
+  drawerOptions.innerHTML = kind === 'multi' ? multiOptionsHTML()
+                          : kind === 'single' ? singleOptionsHTML() : '';
+  const problem = pickProblem();
+  drawerCta.href = problem ? '#' : waLink(buildMessage(pickProduct));
+  drawerCta.setAttribute('aria-disabled', problem ? 'true' : 'false');
+  if (!problem) drawerHint.hidden = true;
+}
+
+// Clicks en pills y en el − / +: actualizan el estado y se re-pinta todo.
+drawerOptions.addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  if (pickProduct.shirt === 'multi'){
+    const row = pick.rows[btn.closest('.drawer__row').dataset.color];
+    if (btn.dataset.qty)  row.qty = Math.max(0, row.qty + Number(btn.dataset.qty));
+    if (btn.dataset.size) row.size = btn.dataset.size;
+  } else {
+    if (btn.dataset.color) pick.color = btn.dataset.color;
+    if (btn.dataset.size)  pick.size  = btn.dataset.size;
+  }
+  renderOptions();
+});
+
+// Si falta elegir algo, el botón no manda nada y avisa qué falta.
+drawerCta.addEventListener('click', e => {
+  const problem = pickProblem();
+  if (!problem) return;
+  e.preventDefault();
+  drawerHint.textContent = problem;
+  drawerHint.hidden = false;
+});
+
 function openDrawer(p){
   lastFocus = document.activeElement;
 
@@ -272,7 +389,13 @@ function openDrawer(p){
   $('#drawerDesc').textContent  = p.desc || '';
   $('#drawerIncludes').innerHTML = includesHTML(p.includes);
   $('#drawerTracklist').innerHTML = tracklistHTML(p.tracklist);
-  $('#drawerCta').href = waLink(p.name);
+
+  pickProduct = p;
+  pick = p.shirt === 'multi'
+    ? { rows: Object.fromEntries(SITE.shirt.colors.map(c => [c, { qty: 0, size: '' }])) }
+    : { color: '', size: '' };
+  drawerHint.hidden = true;
+  renderOptions();
 
   drawer.hidden = false; scrim.hidden = false;
   requestAnimationFrame(() => { drawer.classList.add('is-on'); scrim.classList.add('is-on'); });

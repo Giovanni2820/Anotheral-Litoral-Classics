@@ -8,7 +8,7 @@ const SITE = {
 
   // Número de WhatsApp: código de país + área + número, sin "+" ni espacios.
   // Ej. Argentina, Rosario: 549341XXXXXXX
-  whatsapp: '5493410000000',
+  whatsapp: '5493447543863',
 
   // Video de YouTube: se puede pegar el link completo o sólo el ID.
   // Vacío = se muestra el placeholder "VIDEO CLIP DE YOUTUBE".
@@ -89,7 +89,7 @@ const SITE = {
       {
         id: '3', label: '3',
         pieces: [
-          { id: 'remera-blanca', img: 'media/REMERA BLANCA PNG.png', alt: 'Remera blanca' },
+          { id: 'remera-roja',  img: 'media/REMERA ROJA.png',       alt: 'Remera roja'  },
           { id: 'remera-negra',  img: 'media/REMERA NEGRA PNG.png',  alt: 'Remera negra'  },
         ],
         name: '"TRACKLIST // EL BIFE ORIGINAL"', title: 'remera:',
@@ -98,6 +98,11 @@ const SITE = {
       },
     ],
   },
+
+  // --- REMERAS ------------------------------------------------------------
+  // Colores y talles que se eligen en la ventana de detalle antes de mandar
+  // el WhatsApp. Los usan los productos que tengan `shirt`.
+  shirt: { colors: ['Roja', 'Negra'], sizes: ['M', 'L', 'XL', 'XXL'] },
 
   // --- PRODUCTOS ----------------------------------------------------------
   // Para agregar uno, copiar un bloque y cambiar los datos: la grilla lo toma sola.
@@ -112,6 +117,9 @@ const SITE = {
   // bg:       opcional, color de fondo de la foto (ej. '#5a1213'). Si la foto no
   //           es cuadrada, rellena las franjas que quedan libres para que el fondo
   //           siga parejo. Sin bg, las franjas quedan blancas.
+  // shirt:    opcional. 'multi'  = se elige cantidad por color, cada color con
+  //           su talle (remera suelta). 'single' = una sola remera: color y
+  //           talle (combo). Sin shirt, el WhatsApp sale sin opciones.
   products: [
     {
       name: '"COCINA POR PESO$" edición física',
@@ -148,6 +156,7 @@ const SITE = {
       ],
       img: 'media/Producto2.png',
       bg: '#781918',
+      shirt: 'multi',
     },
     {
       name: '"COMBO COMPLETO" CD + REMERA "COCINA POR PESO$"',
@@ -159,6 +168,7 @@ const SITE = {
       ],
       img: 'media/Producto3.png',
       bg: '#6e0707',
+      shirt: 'single',
     },
   ],
 

@@ -247,7 +247,7 @@ svg{ width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.5;
 [data-piece="cd"]           { left:-1%;   top:2.5%;  width:31.5%; z-index:2; }
 [data-piece="disco"]        { left:21%;   top:17.5%; width:33%;   z-index:3; }
 [data-piece="librito"]      { left:46%;   top:.5%;   width:27.5%; z-index:2; }
-[data-piece="remera-blanca"]{ left:70%;   top:1.5%;  width:33.5%; z-index:2; }
+[data-piece="remera-roja"]{ left:70%;   top:1.5%;  width:33.5%; z-index:2; }
 [data-piece="remera-negra"] { left:70.5%; top:29%;   width:33%;   z-index:3; }
 [data-piece="sticker-cxs"]  { left:43.5%; top:59%;   width:25%;   z-index:3; }
 [data-piece="sticker-dedo"] { left:31.5%; top:52%;   width:24%;   z-index:4; }
@@ -339,14 +339,14 @@ svg{ width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.5;
 [data-piece="disco"] img        { animation:collage-spin 36s linear infinite; }
 [data-piece="sticker-dedo"] img { animation:collage-float 5s ease-in-out infinite; }
 [data-piece="sticker-cxs"] img  { animation:collage-float 6s ease-in-out infinite; animation-delay:-2s; }
-[data-piece="remera-blanca"] img{ animation:collage-sway 7s ease-in-out infinite; }
+[data-piece="remera-roja"] img{ animation:collage-sway 7s ease-in-out infinite; }
 [data-piece="remera-negra"] img { animation:collage-sway 7s ease-in-out infinite; animation-delay:-3.5s; }
 
 /* --- hover: cada pieza se levanta un poco --- */
 [data-piece="cd"]:hover img           { rotate:-2deg; scale:1.03; }
 [data-piece="disco"]:hover img        { scale:1.04; }
 [data-piece="librito"]:hover img      { rotate:3deg;  scale:1.04; }
-[data-piece="remera-blanca"]:hover img,
+[data-piece="remera-roja"]:hover img,
 [data-piece="remera-negra"]:hover img { scale:1.04; }
 [data-piece="sticker-dedo"]:hover img { rotate:-8deg; scale:1.06; }
 [data-piece="sticker-cxs"]:hover img  { rotate:6deg;  scale:1.06; }
@@ -523,14 +523,54 @@ svg{ width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.5;
 }
 .drawer__tracklist li{ margin:0 0 4px; padding-left:4px; }
 .drawer__tracklist li::marker{ font-weight:700; color:var(--shop-ink); }
+/* opciones de remera: color, talle y cantidad, antes del WhatsApp */
+.drawer__options:empty{ display:none; }
+.drawer__options{ display:flex; flex-direction:column; gap:14px; margin-top:4px; }
+.drawer__row{ display:flex; flex-direction:column; gap:8px; }
+.drawer__row + .drawer__row{ padding-top:12px; border-top:1px solid #ececec; }
+.drawer__rowhead{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.drawer__rowname{
+  font-size:12px; font-weight:700; letter-spacing:1.1px; text-transform:uppercase;
+  color:var(--shop-ink);
+}
+.drawer__pills{ display:flex; flex-wrap:wrap; gap:6px; }
+.drawer__pill{
+  min-width:44px; padding:8px 12px;
+  border:1px solid #cfcfcf; background:#fff; color:var(--shop-ink);
+  font-family:inherit; font-size:12px; font-weight:600; letter-spacing:.8px; text-transform:uppercase;
+  cursor:pointer; transition:background .15s var(--ease), border-color .15s var(--ease), color .15s var(--ease);
+}
+.drawer__pill:hover{ border-color:var(--shop-ink); }
+.drawer__pill[aria-pressed="true"]{ background:var(--shop-ink); border-color:var(--shop-ink); color:#fff; }
+.drawer__pill[disabled]{ opacity:.35; cursor:default; }
+
+/* cantidad: − 0 + */
+.drawer__qty{ display:inline-flex; align-items:center; border:1px solid #cfcfcf; }
+.drawer__qty button{
+  width:34px; height:34px; display:grid; place-items:center;
+  font-size:18px; line-height:1; color:var(--shop-ink); background:#fff;
+  transition:background .15s var(--ease);
+}
+.drawer__qty button:hover{ background:#f2f2f2; }
+.drawer__qty button:disabled{ opacity:.3; cursor:default; background:#fff; }
+.drawer__qty output{
+  min-width:34px; text-align:center; font-size:14px; font-weight:700;
+  border-left:1px solid #e6e6e6; border-right:1px solid #e6e6e6; line-height:34px;
+}
+
+.drawer__hint{ margin:0; font-size:13px; color:#b3261e; }
+.drawer__hint[hidden]{ display:none; }
+
 .drawer__cta{
   margin-top:10px;
   display:block; padding:16px 20px; text-align:center;
   background:var(--shop-ink); color:#fff;
   font-size:12px; font-weight:600; letter-spacing:1.1px; text-transform:uppercase;
-  transition:background .2s var(--ease);
+  transition:background .2s var(--ease), opacity .2s var(--ease);
 }
 .drawer__cta:hover{ background:#000; }
+.drawer__cta[aria-disabled="true"]{ opacity:.45; cursor:not-allowed; }
+.drawer__cta[aria-disabled="true"]:hover{ background:var(--shop-ink); }
 
 body.is-locked{ overflow:hidden; }
 
