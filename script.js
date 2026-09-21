@@ -223,7 +223,27 @@ if (SITE.merch){
 function mediaHTML(p){
   if (!p.img) return `<div class="card__placeholder">${esc(p.name)}</div>`;
   const bg = p.bg ? ` style="background:${esc(p.bg)}"` : '';
-  return `<img class="card__img" src="${esc(p.img)}" alt="${esc(p.name)}" loading="lazy"${bg}>`;
+  return `<img class="card__img" src="${esc(p.img)}" alt="${esc(p.name)}" loading="lazy"${bg} onload="matchEdge(this)">`;
+}
+
+// El bg cargado a mano nunca es exactamente el rojo de la foto y se notan las
+// franjas. Cuando la foto termina de cargar, se lee el color promedio de su
+// borde y se usa ese mismo de fondo: las franjas quedan invisibles.
+function matchEdge(img){
+  try {
+    const c = document.createElement('canvas');
+    const w = c.width = 64, h = c.height = Math.max(1, Math.round(64 * img.naturalHeight / img.naturalWidth));
+    const g = c.getContext('2d');
+    g.drawImage(img, 0, 0, w, h);
+    const d = g.getImageData(0, 0, w, h).data;
+    let r = 0, gr = 0, b = 0, n = 0;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++){
+      if (x > 1 && x < w - 2 && y > 1 && y < h - 2) continue;   // sólo el marco de 2px
+      const i = (y * w + x) * 4;
+      r += d[i]; gr += d[i + 1]; b += d[i + 2]; n++;
+    }
+    img.style.background = `rgb(${Math.round(r / n)}, ${Math.round(gr / n)}, ${Math.round(b / n)})`;
+  } catch (e) { /* file:// u origen distinto: queda el bg de data.js */ }
 }
 
 function cardHTML(p, i){
